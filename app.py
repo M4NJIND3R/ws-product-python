@@ -3,6 +3,9 @@
 import os
 from flask import Flask, jsonify
 import sqlalchemy
+from requestor import requestor
+from limiter import limit_client_request
+
 
 # web app
 app = Flask(__name__)
@@ -11,13 +14,16 @@ app = Flask(__name__)
 engine = sqlalchemy.create_engine(os.getenv('SQL_URI'))
 
 
+
 @app.route('/')
 def index():
+    limit_client_request()
     return 'Welcome to EQ Works 😎'
 
 
 @app.route('/events/hourly')
 def events_hourly():
+    limit_client_request()
     return query_helper('''
         SELECT date, hour, events
         FROM public.hourly_events
@@ -28,6 +34,7 @@ def events_hourly():
 
 @app.route('/events/daily')
 def events_daily():
+    limit_client_request()
     return query_helper('''
         SELECT date, SUM(events) AS events
         FROM public.hourly_events
@@ -39,6 +46,7 @@ def events_daily():
 
 @app.route('/stats/hourly')
 def stats_hourly():
+    limit_client_request()
     return query_helper('''
         SELECT date, hour, impressions, clicks, revenue
         FROM public.hourly_stats
@@ -49,6 +57,7 @@ def stats_hourly():
 
 @app.route('/stats/daily')
 def stats_daily():
+    limit_client_request()
     return query_helper('''
         SELECT date,
             SUM(impressions) AS impressions,
@@ -62,12 +71,14 @@ def stats_daily():
 
 @app.route('/poi')
 def poi():
+    limit_client_request()
     return query_helper('''
         SELECT *
         FROM public.poi;
     ''')
 
 def query_helper(query):
+    limit_client_request()
     with engine.connect() as conn:
         result = conn.execute(query).fetchall()
         return jsonify([dict(row.items()) for row in result])
