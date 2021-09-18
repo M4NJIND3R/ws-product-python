@@ -8,6 +8,7 @@ requestor.incrementReq(clientUniqueId) #requestor class keeping data of requesto
 
 def limit_client_request(lim_per_sec, lim_per_min):
     
+    ##limit based on argument passed
     if ((reqTime - requestor.getReqTime(clientUniqueId)).seconds < 1 and requestor.getReqCount(clientUniqueId) > lim_per_sec  ):
         return '😣 Page is quite busy, try again after some time'
     else:
